@@ -1,0 +1,31 @@
+version: "3.8"
+services:
+  db:
+    image: postgis/postgis:15-3.3
+    environment:
+      POSTGRES_PASSWORD: example
+      POSTGRES_DB: s2s
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+  backend:
+    image: python:3.11-slim
+    working_dir: /app
+    volumes:
+      - ./backend:/app
+    command: sh -c "pip install -r requirements.txt && uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+  frontend:
+    image: node:18-alpine
+    working_dir: /app
+    volumes:
+      - ./frontend:/app
+    command: sh -c "npm ci && npm run dev"
+    ports:
+      - "5173:5173"
+volumes:
+  db_data:
