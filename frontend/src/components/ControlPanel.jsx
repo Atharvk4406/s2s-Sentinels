@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import * as api from '../services/api'
+import WeatherPanel from './WeatherPanel'
 
 const SAMPLE_AOI = {
   "type": "Feature",
@@ -15,6 +16,18 @@ const SAMPLE_AOI = {
         [90.404, 23.807]
       ]
     ]
+  }
+}
+
+function centroidFromAoi(aoi){
+  try{
+    const coords = aoi.geometry.coordinates[0]
+    let sumx=0,sumy=0
+    coords.forEach(c=>{ sumx+=c[0]; sumy+=c[1] })
+    const n = coords.length
+    return { lon: sumx/n, lat: sumy/n }
+  }catch(e){
+    return { lat:23.8103, lon:90.4125 }
   }
 }
 
@@ -63,6 +76,8 @@ export default function ControlPanel({ aoi, setAoi, setResult }){
     }
   }
 
+  const center = aoi ? centroidFromAoi(aoi) : { lat:23.8103, lon:90.4125 }
+
   return (
     <div>
       <h2>S2S Sentinel</h2>
@@ -85,11 +100,12 @@ export default function ControlPanel({ aoi, setAoi, setResult }){
         <strong>Status:</strong> {status}
       </div>
       <hr />
+      <WeatherPanel lat={center.lat} lon={center.lon} />
       <div>
         <h3>Notes</h3>
         <ul>
           <li>Sample AOI is a small polygon. Use it to demo the pipeline.</li>
-          <li>Analysis is a demo: backend returns a synthesized "flood" result.</li>
+          <li>Analysis is a demo: backend returns a synthesized "flood" result if sample sentinel data is missing.</li>
         </ul>
       </div>
     </div>
