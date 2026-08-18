@@ -10,11 +10,11 @@ services:
     volumes:
       - db_data:/var/lib/postgresql/data
   backend:
-    image: python:3.11-slim
+    build: ./backend
     working_dir: /app
     volumes:
       - ./backend:/app
-    command: sh -c "pip install -r requirements.txt && uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
+      - ./data:/app/data
     ports:
       - "8000:8000"
     depends_on:
