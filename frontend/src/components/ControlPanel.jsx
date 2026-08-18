@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import * as api from '../services/api'
 import WeatherPanel from './WeatherPanel'
+import ClockPanel from './ClockPanel'
 
 const SAMPLE_AOI = {
   "type": "Feature",
@@ -100,6 +101,9 @@ export default function ControlPanel({ aoi, setAoi, setResult }){
         <strong>Status:</strong> {status}
       </div>
       <hr />
+
+      <ClockPanel />
+
       <WeatherPanel lat={center.lat} lon={center.lon} />
       <div>
         <h3>Notes</h3>
