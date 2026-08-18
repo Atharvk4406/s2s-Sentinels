@@ -1,2 +1,9 @@
 fastapi
 uvicorn[standard]
+numpy
+rasterio
+rioxarray
+geopandas
+shapely
+scikit-image
+osmnx

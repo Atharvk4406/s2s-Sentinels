@@ -1,7 +1,10 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Dict, Any
+import uuid
+
+from services.jobs import run_flood_job
 
 app = FastAPI(title="S2S Sentinel API")
 
@@ -25,22 +28,13 @@ def health():
     return {"status": "ok"}
 
 @app.post("/api/analyze")
-def analyze(payload: AnalyzePayload):
-    # Very small demo analyzer: store the AOI as the affectedGeometry
-    job_id = "demo-1"
-    result = {
-        "disasterType": payload.disasterType,
-        "affectedGeometry": payload.aoi,
-        "affectedArea_km2": 1.23,
-        "severity": 0.6,
-        "confidence": 0.8,
-        "affectedRoads": [],
-        "affectedFacilities": [],
-        "populationExposure": 1200,
-        "timestamps": {"observation": None, "analysis": None}
-    }
-    RESULTS[job_id] = {"status": "finished", "result": result}
-    return {"job_id": job_id, "status": "finished"}
+def analyze(payload: AnalyzePayload, background_tasks: BackgroundTasks):
+    # Create a job id and schedule background analysis
+    job_id = str(uuid.uuid4())
+    RESULTS[job_id] = {"status": "running", "result": None}
+    # Kick off background job; pass RESULTS so the job can store its result
+    background_tasks.add_task(run_flood_job, job_id, payload.aoi, RESULTS)
+    return {"job_id": job_id, "status": "running"}
 
 @app.get("/api/analysis/{job_id}")
 def get_analysis(job_id: str):
